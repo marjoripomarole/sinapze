@@ -343,6 +343,30 @@ function _staticExam(name) { return __STATIC__?.exams?.find(e => e.name === name
 
 marked.setOptions({ breaks: true, gfm: true });
 
+function slugify(text) {
+  // Matches the LLM anchor format: non-(unicode-letter/digit/space/hyphen) → hyphen, spaces → hyphens, lowercase
+  return text.toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '-')
+    .replace(/\s+/g, '-');
+}
+
+function fixGuideAnchors() {
+  const prose = document.querySelector('.prose');
+  if (!prose) return;
+  // Reassign heading IDs using the same slug algorithm as the LLM's TOC links
+  prose.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => {
+    h.id = slugify(h.textContent.trim());
+  });
+  // Smooth-scroll anchor clicks instead of jumping or doing nothing
+  prose.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = decodeURIComponent(a.getAttribute('href').slice(1));
+      const target = document.getElementById(id) || document.getElementById(slugify(id));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+}
+
 function initMermaid(light) {
   mermaid.initialize({
     startOnLoad: false,
@@ -458,7 +482,7 @@ function app() {
         if (!content) { this.guideError = 'Guia não gerado ainda.'; return; }
         this.guideHtml = marked.parse(content);
         this.statusMsg = 'Guia carregado';
-        this.$nextTick(() => { renderMermaid(); renderKaTeX(); });
+        this.$nextTick(() => { renderMermaid(); renderKaTeX(); fixGuideAnchors(); });
       } catch { this.guideError = 'Guia não gerado ainda.'; }
       finally { this.guideLoading = false; }
     },
