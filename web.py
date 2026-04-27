@@ -65,7 +65,7 @@ def get_apkg(name: str):
     from fastapi.responses import FileResponse
     p = OUT_DIR / f"{name}.apkg"
     if not p.exists():
-        raise HTTPException(404, "Deck não gerado ainda.")
+        raise HTTPException(404, "Baralho ainda não gerado.")
     return FileResponse(p, media_type="application/octet-stream", filename=f"{name}.apkg")
 
 
@@ -262,7 +262,7 @@ HTML = r"""<!DOCTYPE html>
         <a :href="apkgUrl" download
           class="app-btn text-sm px-4 py-2 rounded-lg transition-colors"
           style="border-color:var(--accent); color:var(--accent)">
-          Baixar deck Anki (.apkg)
+          Baixar baralho Anki (.apkg)
         </a>
       </div>
       <div class="flex items-center gap-4 mb-6">
@@ -270,7 +270,7 @@ HTML = r"""<!DOCTYPE html>
           class="app-input flex-1 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
         <span class="text-sm muted"><span x-text="filteredCards.length"></span> cartões</span>
         <button @click="shuffleCards()" class="app-btn text-sm px-3 py-2 rounded-lg transition-colors">Embaralhar</button>
-        <button @click="resetProgress()" class="text-sm dimmed hover:text-sky-500 transition-colors">Resetar</button>
+        <button @click="resetProgress()" class="text-sm dimmed hover:text-sky-500 transition-colors">Reiniciar</button>
       </div>
 
       <div class="mb-6">
@@ -479,11 +479,11 @@ function app() {
         const sd = _staticExam(this.currentExam);
         const content = sd?.guide ?? await fetch('/api/exam/' + this.currentExam + '/guide')
           .then(r => { if (!r.ok) throw r; return r.json(); }).then(j => j.content);
-        if (!content) { this.guideError = 'Guia não gerado ainda.'; return; }
+        if (!content) { this.guideError = 'Guia ainda não gerado.'; return; }
         this.guideHtml = marked.parse(content);
         this.statusMsg = 'Guia carregado';
         this.$nextTick(() => { renderMermaid(); renderKaTeX(); fixGuideAnchors(); });
-      } catch { this.guideError = 'Guia não gerado ainda.'; }
+      } catch { this.guideError = 'Guia ainda não gerado.'; }
       finally { this.guideLoading = false; }
     },
 
