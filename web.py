@@ -289,7 +289,7 @@ HTML = r"""<!DOCTYPE html>
               </div>
 
               <div class="card-back absolute inset-0 rounded-2xl p-8 flex flex-col justify-center">
-                <p class="text-base leading-relaxed" x-text="currentCard.back || '(cloze — ver frente)'"></p>
+                <p class="text-base leading-relaxed" x-html="renderCardBack(currentCard)"></p>
                 <div x-show="currentCard.explanation" class="mt-4 text-sm dimmed pt-3" style="border-top:1px solid var(--border)" x-text="currentCard.explanation"></div>
                 <div x-show="currentCard.mnemonic" class="mt-3 text-sm text-amber-600 italic" x-text="'Mnemônico: ' + currentCard.mnemonic"></div>
                 <p class="text-xs dimmed mt-3 pt-3" style="border-top:1px solid var(--border)" x-text="'Fonte: ' + currentCard.source_span"></p>
@@ -482,6 +482,14 @@ function app() {
       this.cardProgress[this.currentCard.card_id] = rating;
       localStorage.setItem('cardProgress_' + this.currentExam, JSON.stringify(this.cardProgress));
       this.nextCard();
+    },
+
+    renderCardBack(card) {
+      if (card.back) return card.back;
+      // cloze: reveal all {{cN::answer::hint}} answers highlighted in context
+      return card.front
+        .replace(/\{\{c\d+::([^:}]+)(?:::[^}]*)?\}\}/g,
+          '<span style="color:var(--accent);font-weight:700;border-bottom:2px solid var(--accent)">$1</span>');
     },
 
     shuffleCards()   { this.cards = [...this.cards].sort(() => Math.random() - .5); this.cardIndex = 0; this.cardFlipped = false; },
