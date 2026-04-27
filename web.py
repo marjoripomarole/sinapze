@@ -57,6 +57,15 @@ def get_plan(name: str) -> JSONResponse:
     raise HTTPException(404, "Plan not generated yet. Run: medstudy plan --exam " + name)
 
 
+@app.get("/api/exam/{name}/apkg")
+def get_apkg(name: str):
+    from fastapi.responses import FileResponse
+    p = OUT_DIR / f"{name}.apkg"
+    if not p.exists():
+        raise HTTPException(404, "Deck não gerado ainda.")
+    return FileResponse(p, media_type="application/octet-stream", filename=f"{name}.apkg")
+
+
 @app.get("/api/exam/{name}/cards")
 def get_cards(name: str) -> JSONResponse:
     p = DATA_DIR / f"cards__{name}.json"
@@ -236,13 +245,6 @@ HTML = r"""<!DOCTYPE html>
     <div x-show="!guideLoading && !guideError" class="prose" x-html="guideHtml"></div>
   </div>
 
-  <!-- ── PLAN ── -->
-  <div x-show="activeTab === 'plan'">
-    <div x-show="planLoading" class="muted text-center py-20">Carregando plano…</div>
-    <div x-show="planError" class="panel rounded-xl p-8 text-center muted"><p x-text="planError"></p></div>
-    <div x-show="!planLoading && !planError" class="prose" x-html="planHtml"></div>
-  </div>
-
   <!-- ── CARDS ── -->
   <div x-show="activeTab === 'cards'">
     <div x-show="!exam || !exam.has_cards" class="panel rounded-xl p-10 text-center muted">
@@ -253,6 +255,13 @@ HTML = r"""<!DOCTYPE html>
     </div>
 
     <div x-show="exam && exam.has_cards">
+      <div class="flex justify-end mb-4">
+        <a :href="apkgUrl" download
+          class="app-btn text-sm px-4 py-2 rounded-lg transition-colors"
+          style="border-color:var(--accent); color:var(--accent)">
+          Baixar deck Anki (.apkg)
+        </a>
+      </div>
       <div class="flex items-center gap-4 mb-6">
         <input x-model="cardSearch" type="search" placeholder="Buscar cartões…"
           class="app-input flex-1 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500">
@@ -386,14 +395,11 @@ function app() {
     light: localStorage.getItem('theme') === 'light',
     tabs: [
       { id: 'guide', label: 'Guia de Estudos' },
-      { id: 'plan',  label: 'Plano de Revisão' },
       { id: 'cards', label: 'Cartões' },
     ],
     guideHtml: '', guideLoading: true, guideError: '',
-    planHtml: '',  planLoading: true,  planError: '',
-    planChecks: {},
     cards: [], cardIndex: 0, cardFlipped: false, cardSearch: '',
-    cardProgress: {}, statusMsg: '',
+    cardProgress: {}, statusMsg: '', apkgUrl: '#',
 
     get currentCard() { return this.filteredCards[this.cardIndex] || null; },
     get filteredCards() {
@@ -434,9 +440,10 @@ function app() {
       this.guideLoading = true; this.guideError = '';
       this.planLoading  = true; this.planError  = '';
       this.cards = []; this.cardIndex = 0;
-      this.planChecks   = JSON.parse(localStorage.getItem('planChecks_'   + this.currentExam) || '{}');
       this.cardProgress = JSON.parse(localStorage.getItem('cardProgress_' + this.currentExam) || '{}');
-      await Promise.all([this.loadGuide(), this.loadPlan()]);
+      const sd = _staticExam(this.currentExam);
+      this.apkgUrl = sd?.apkg_url ?? '/api/exam/' + this.currentExam + '/apkg';
+      await this.loadGuide();
       if (this.exam?.has_cards) await this.loadCards();
     },
 
@@ -453,30 +460,6 @@ function app() {
       finally { this.guideLoading = false; }
     },
 
-    async loadPlan() {
-      try {
-        const sd = _staticExam(this.currentExam);
-        const content = sd?.plan ?? await fetch('/api/exam/' + this.currentExam + '/plan')
-          .then(r => { if (!r.ok) throw r; return r.json(); }).then(j => j.content);
-        if (!content) { this.planError = 'Plano não gerado ainda.'; return; }
-        this.planHtml = this.renderPlan(content);
-      } catch { this.planError = 'Plano não gerado ainda.'; }
-      finally { this.planLoading = false; }
-    },
-
-    renderPlan(md) {
-      let idx = 0;
-      const withChecks = md.replace(/- \[ \] (.+)/g, (_, text) => {
-        const id = 'check_' + idx++;
-        const checked = this.planChecks[id] ? 'checked' : '';
-        return `<div class="flex items-start gap-2 my-2">
-          <input type="checkbox" id="${id}" class="plan-check mt-1 accent-sky-500 w-4 h-4 flex-shrink-0" ${checked}
-            onchange="window.savePlanCheck('${id}', this.checked)">
-          <label for="${id}" class="cursor-pointer text-sm leading-relaxed">${text}</label>
-        </div>`;
-      });
-      return marked.parse(withChecks);
-    },
 
     async loadCards() {
       try {
@@ -509,13 +492,6 @@ function app() {
   };
 }
 
-window.savePlanCheck = function(id, checked) {
-  const exam = document.querySelector('select')?.value || '';
-  const key = 'planChecks_' + exam;
-  const data = JSON.parse(localStorage.getItem(key) || '{}');
-  data[id] = checked;
-  localStorage.setItem(key, JSON.stringify(data));
-};
 </script>
 </body>
 </html>

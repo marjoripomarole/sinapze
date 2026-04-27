@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -35,15 +36,16 @@ def load_exam_data(name: str) -> dict:
     if c.exists():
         cards = json.loads(c.read_text(encoding="utf-8")).get("cards", [])
 
+    apkg_exists = (OUT_DIR / f"{name}.apkg").exists()
+
     return {
         "name": name,
         "guide": guide,
-        "plan": plan,
         "cards": cards,
         "has_guide": bool(guide),
-        "has_plan": bool(plan),
         "has_cards": bool(cards),
         "card_count": len(cards),
+        "apkg_url": f"{name}.apkg" if apkg_exists else None,
     }
 
 
@@ -82,6 +84,13 @@ def build(exam_filter: str | None = None) -> Path:
     DOCS_DIR.mkdir(exist_ok=True)
     out = DOCS_DIR / "index.html"
     out.write_text(static_html, encoding="utf-8")
+
+    # copy .apkg files so the download link works on GitHub Pages
+    for e in exams:
+        apkg_src = OUT_DIR / f"{e['name']}.apkg"
+        if apkg_src.exists():
+            shutil.copy2(apkg_src, DOCS_DIR / apkg_src.name)
+            print(f"  copiado {apkg_src.name} → docs/")
 
     size_kb = out.stat().st_size // 1024
     print(f"\nSite estático gerado → {out}  ({size_kb} KB)")
