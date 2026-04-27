@@ -1,4 +1,4 @@
-"""Simple web interface for medstudy output files.
+"""Simple web interface for sinapze output files.
 
 Run:  python web.py
 Then open: http://localhost:8000
@@ -13,10 +13,10 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 
-app = FastAPI(title="medstudy")
+app = FastAPI(title="sinapze")
 
 OUT_DIR = Path(__file__).parent / "out"
-DATA_DIR = Path(__file__).parent / ".medstudy"
+DATA_DIR = Path(__file__).parent / ".sinapze"
 
 
 # ---------- API ---------------------------------------------------------------
@@ -44,7 +44,7 @@ def list_exams() -> JSONResponse:
 def get_guide(name: str) -> JSONResponse:
     p = OUT_DIR / f"{name}_guide.md"
     if not p.exists():
-        raise HTTPException(404, "Guide not generated yet. Run: medstudy guide --exam " + name)
+        raise HTTPException(404, "Guide not generated yet. Run: sinapze guide --exam " + name)
     return JSONResponse({"content": p.read_text(encoding="utf-8")})
 
 
@@ -54,7 +54,7 @@ def get_plan(name: str) -> JSONResponse:
         p = OUT_DIR / f"{name}{suffix}"
         if p.exists():
             return JSONResponse({"content": p.read_text(encoding="utf-8")})
-    raise HTTPException(404, "Plan not generated yet. Run: medstudy plan --exam " + name)
+    raise HTTPException(404, "Plan not generated yet. Run: sinapze plan --exam " + name)
 
 
 @app.get("/api/exam/{name}/apkg")
@@ -70,7 +70,7 @@ def get_apkg(name: str):
 def get_cards(name: str) -> JSONResponse:
     p = DATA_DIR / f"cards__{name}.json"
     if not p.exists():
-        raise HTTPException(404, "Cards not generated yet. Run: medstudy cards --exam " + name)
+        raise HTTPException(404, "Cards not generated yet. Run: sinapze cards --exam " + name)
     return JSONResponse(json.loads(p.read_text(encoding="utf-8")))
 
 
@@ -86,7 +86,7 @@ HTML = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>medstudy</title>
+<title>sinapze</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
@@ -202,7 +202,7 @@ HTML = r"""<!DOCTYPE html>
 
 <!-- Header -->
 <header class="app-header px-6 py-3 flex items-center gap-4 sticky top-0 z-50">
-  <span class="font-bold text-sky-500 text-lg tracking-tight">medstudy</span>
+  <span class="font-bold text-sky-500 text-lg tracking-tight">sinapze</span>
 
   <select x-model="currentExam" @change="switchExam()" class="exam-select text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-sky-500">
     <template x-for="e in exams" :key="e.name">
@@ -250,7 +250,7 @@ HTML = r"""<!DOCTYPE html>
     <div x-show="!exam || !exam.has_cards" class="panel rounded-xl p-10 text-center muted">
       <p class="text-lg mb-2">Os cartões ainda não foram gerados.</p>
       <code class="text-sm panel2 px-3 py-1.5 rounded text-sky-600">
-        medstudy cards --exam <span x-text="currentExam"></span> --output ./out/<span x-text="currentExam"></span>.apkg
+        sinapze cards --exam <span x-text="currentExam"></span> --output ./out/<span x-text="currentExam"></span>.apkg
       </code>
     </div>
 

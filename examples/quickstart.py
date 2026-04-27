@@ -6,14 +6,14 @@ ANTHROPIC_API_KEY in .env.
 
 from pathlib import Path
 
-from medstudy import (
+from sinapze import (
     export_anki_deck,
     export_markdown_guide,
     generate_cards,
     generate_study_guide,
     ingest_directory,
 )
-from medstudy.ingest import auto_scope_from_sources, save_scope
+from sinapze.ingest import auto_scope_from_sources, save_scope
 
 
 def main() -> None:

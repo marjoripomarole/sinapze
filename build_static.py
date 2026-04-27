@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 OUT_DIR = Path(__file__).parent / "out"
-DATA_DIR = Path(__file__).parent / ".medstudy"
+DATA_DIR = Path(__file__).parent / ".sinapze"
 DOCS_DIR = Path(__file__).parent / "docs"
 
 
@@ -56,7 +56,7 @@ def build(exam_filter: str | None = None) -> Path:
 
     scope_files = sorted(DATA_DIR.glob("scope__*.json"))
     if not scope_files:
-        print("Nenhum scope encontrado. Rode medstudy ingest + scope primeiro.")
+        print("Nenhum scope encontrado. Rode sinapze ingest + scope primeiro.")
         sys.exit(1)
 
     exams = []

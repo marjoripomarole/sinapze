@@ -1,4 +1,4 @@
-# medstudy
+# sinapze
 
 A source-grounded study-material generator for medical school. Reads your
 PDFs and Obsidian notes, produces a study guide and Anki deck (`.apkg`)
@@ -65,23 +65,23 @@ cp .env.example .env
 # edit .env → ANTHROPIC_API_KEY=sk-ant-...
 
 # 3. point it at your materials
-medstudy ingest --source ~/GoogleDrive/MedSchool/MoleculaACelula
+sinapze ingest --source ~/GoogleDrive/MedSchool/MoleculaACelula
 
 # 4. define exam scope — TWO options
 #    (a) frontmatter-driven (recommended): tag your Obsidian notes
-medstudy scope-from-tags --exam prova1
+sinapze scope-from-tags --exam prova1
 #    (b) keyword-driven (works without tagging)
-medstudy scope --exam prova1 --include "molecula" --exclude "draft"
+sinapze scope --exam prova1 --include "molecula" --exclude "draft"
 
 # 5. study guide first (do this tonight)
-medstudy guide --exam prova1 --output ./out/guide.md \
+sinapze guide --exam prova1 --output ./out/guide.md \
   --course-description "biomoléculas, pH, enzimas, membranas, ciclo celular"
 
 # 6. Anki cards (do this tomorrow morning)
-medstudy cards --exam prova1 --output ./out/prova1.apkg --max-cards 300
+sinapze cards --exam prova1 --output ./out/prova1.apkg --max-cards 300
 
 # 7. cram schedule (printout you can follow over 24h)
-medstudy plan --exam prova1 --exam-datetime 2026-04-28T09:00 --lang pt-BR \
+sinapze plan --exam prova1 --exam-datetime 2026-04-28T09:00 --lang pt-BR \
   --output ./out/cram_plan.md
 ```
 
@@ -105,7 +105,7 @@ objectives: [glycolysis, krebs, etmc]
 
 Sources are then ranked by `exam_weight × high_yield × word_count`, so
 when the deck cap forces a trim, low-priority material drops first.
-Run `medstudy rank` to see the current ranking.
+Run `sinapze rank` to see the current ranking.
 
 ## The 24-hour cram plan (v0.2)
 
@@ -136,7 +136,7 @@ Both work — there's a thin `LLMClient` abstraction. Claude's defaults
 (higher token limits, lower hallucination on long-context summarization in
 the Nature 2025 benchmarks, native `tool_use` for structured output) make
 it the better default for medical content. Swap by changing
-`MEDSTUDY_LLM_PROVIDER`.
+`SINAPZE_LLM_PROVIDER`.
 
 ### Why two passes (extract → cardify) instead of one
 One-pass card generation conflates two reasoning steps and the model often
