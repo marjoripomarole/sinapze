@@ -79,6 +79,9 @@ HTML = r"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>medstudy</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
@@ -176,6 +179,14 @@ HTML = r"""<!DOCTYPE html>
   .mermaid-wrap { background:var(--surface); border:1px solid var(--border); border-radius:.75rem; padding:1.5rem; margin:1rem 0; overflow-x:auto; text-align:center; }
   .mermaid-wrap svg { max-width:100%; height:auto; }
   .mermaid-label { font-size:.7rem; color:var(--text3); text-align:right; margin-top:.5rem; letter-spacing:.03em; }
+
+  /* KaTeX — inherit theme colors */
+  .katex { color:var(--text); font-size:1.05em; }
+  .katex-display { overflow-x:auto; overflow-y:hidden; padding:.75rem 0; margin:.5rem 0; }
+  .katex-display > .katex { background:var(--surface); border:1px solid var(--border); border-radius:.5rem; padding:.6rem 1.2rem; display:inline-block; }
+  .katex .mord { color:var(--text); }
+  .katex .mop, .katex .mrel { color:var(--accent); }
+  .katex .mopen, .katex .mclose { color:var(--text2); }
 </style>
 </head>
 <body class="min-h-screen font-sans" x-data="app()" x-init="init()" :class="light ? 'light' : ''" x-cloak>
@@ -332,6 +343,19 @@ function initMermaid(light) {
   });
 }
 
+function renderKaTeX() {
+  document.querySelectorAll('.prose').forEach(el => {
+    renderMathInElement(el, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true  },
+        { left: '$',  right: '$',  display: false },
+      ],
+      throwOnError: false,
+      errorColor: '#ef4444',
+    });
+  });
+}
+
 async function renderMermaid() {
   await new Promise(r => setTimeout(r, 50)); // let Alpine flush x-html
   const blocks = document.querySelectorAll('pre code.language-mermaid');
@@ -390,6 +414,7 @@ function app() {
       localStorage.setItem('theme', this.light ? 'light' : 'dark');
       initMermaid(this.light);
       renderMermaid();
+      renderKaTeX();
     },
 
     async init() {
@@ -416,7 +441,7 @@ function app() {
         if (!r.ok) { this.guideError = (await r.json()).detail; return; }
         this.guideHtml = marked.parse((await r.json()).content);
         this.statusMsg = 'Guia carregado';
-        this.$nextTick(renderMermaid);
+        this.$nextTick(() => { renderMermaid(); renderKaTeX(); });
       } catch { this.guideError = 'Erro ao carregar guia.'; }
       finally { this.guideLoading = false; }
     },

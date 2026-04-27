@@ -143,6 +143,14 @@ GUIDE_SYSTEM = (
     + """
 LANGUAGE OVERRIDE FOR GUIDE: Always write the entire study guide in Portuguese (pt-BR), regardless of the language of the source material. Use proper Brazilian medical terminology throughout.
 
+FORMULAS: Write ALL mathematical and chemical formulas using LaTeX notation.
+- Inline formulas: wrap in single dollar signs — $CO_2 + H_2O \rightleftharpoons H^+ + HCO_3^-$
+- Display (standalone) formulas: wrap in double dollar signs — $$pCO_2 = 1{,}5 \times [HCO_3^-] + 8 \pm 2$$
+- Subscripts: _ (e.g. $HCO_3^-$, $C_6H_{12}O_6$)
+- Superscripts: ^ (e.g. $Ca^{2+}$, $H^+$)
+- Common symbols: \times (×), \pm (±), \rightleftharpoons (⇄), \rightarrow (→), \uparrow ↑, \downarrow ↓, \leq ≤, \geq ≥
+- Do NOT use Unicode subscript/superscript characters (₂, ⁺, etc.) — always use LaTeX.
+
 TASK: Generate a synthesis-focused study guide. Anki cards handle atomic recall; this guide handles BIG PICTURE understanding that flashcards cannot.
 
 For each topic, produce:
