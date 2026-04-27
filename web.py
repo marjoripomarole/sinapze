@@ -26,12 +26,15 @@ def list_exams() -> JSONResponse:
     exams = []
     for scope_file in sorted(DATA_DIR.glob("scope__*.json")):
         name = scope_file.stem.replace("scope__", "")
+        scope_data = json.loads(scope_file.read_text())
+        display_name = scope_data.get("exam_name") or name
         guide = OUT_DIR / f"{name}_guide.md"
         plan_pt = OUT_DIR / f"{name}_plano_revisao.md"
         plan_en = OUT_DIR / f"{name}_cram_plan.md"
         cards_file = DATA_DIR / f"cards__{name}.json"
         exams.append({
             "name": name,
+            "display_name": display_name,
             "has_guide": guide.exists(),
             "has_plan": plan_pt.exists() or plan_en.exists(),
             "has_cards": cards_file.exists(),
@@ -206,7 +209,7 @@ HTML = r"""<!DOCTYPE html>
 
   <select x-model="currentExam" @change="switchExam()" class="exam-select text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-sky-500">
     <template x-for="e in exams" :key="e.name">
-      <option :value="e.name" x-text="e.name"></option>
+      <option :value="e.name" x-text="e.display_name || e.name"></option>
     </template>
   </select>
 

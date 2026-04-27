@@ -31,6 +31,11 @@ def load_exam_data(name: str) -> dict:
             plan = p.read_text(encoding="utf-8")
             break
 
+    display_name = name
+    s = DATA_DIR / f"scope__{name}.json"
+    if s.exists():
+        display_name = json.loads(s.read_text(encoding="utf-8")).get("exam_name") or name
+
     cards: list = []
     c = DATA_DIR / f"cards__{name}.json"
     if c.exists():
@@ -40,6 +45,7 @@ def load_exam_data(name: str) -> dict:
 
     return {
         "name": name,
+        "display_name": display_name,
         "guide": guide,
         "cards": cards,
         "has_guide": bool(guide),
