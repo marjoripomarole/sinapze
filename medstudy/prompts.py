@@ -203,6 +203,8 @@ Schema: [{{"heading":"...","summary":"...","key_points":["..."],"comparison_tabl
 GUIDE_SUMMARY_SYSTEM = (
     SYSTEM_RULES_BASE
     + """
+LANGUAGE OVERRIDE: Always write the cheat sheet in Portuguese (pt-BR). Use proper Brazilian medical terminology.
+
 TASK: Generate a 1-page high-yield exam cheat sheet from provided section summaries.
 
 Focus on: most testable facts in priority order, classic presentations, mechanisms,

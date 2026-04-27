@@ -157,18 +157,18 @@ def export_markdown_guide(guide: StudyGuide, output_path: Path) -> Path:
     lines: list[str] = []
     lines.append(f"# {guide.exam_name}")
     lines.append("")
-    lines.append(f"*Subject: {guide.subject} · Generated {guide.generated_at.strftime('%Y-%m-%d %H:%M')} · Language: {guide.language}*")
+    lines.append(f"*Matéria: {guide.subject} · Gerado em {guide.generated_at.strftime('%Y-%m-%d %H:%M')} · Idioma: {guide.language}*")
     lines.append("")
 
     if guide.high_yield_summary:
-        lines.append("## 🔥 High-yield exam-day summary")
+        lines.append("## 🔥 Resumo de alto rendimento para o dia da prova")
         lines.append("")
         lines.append(guide.high_yield_summary)
         lines.append("")
         lines.append("---")
         lines.append("")
 
-    lines.append("## Table of contents")
+    lines.append("## Índice")
     lines.append("")
     for i, s in enumerate(guide.sections, start=1):
         slug = _slugify(s.heading)
@@ -183,28 +183,28 @@ def export_markdown_guide(guide: StudyGuide, output_path: Path) -> Path:
         lines.append(s.summary)
         lines.append("")
         if s.key_points:
-            lines.append("### Key points")
+            lines.append("### Pontos-chave")
             lines.append("")
             for kp in s.key_points:
                 lines.append(f"- {kp}")
             lines.append("")
         if s.comparison_table_md:
-            lines.append("### Comparison")
+            lines.append("### Comparação")
             lines.append("")
             lines.append(s.comparison_table_md)
             lines.append("")
         if s.flowchart_mermaid:
-            lines.append("### Flow / pathway")
+            lines.append("### Fluxo / via metabólica")
             lines.append("")
             lines.append("```mermaid")
             lines.append(s.flowchart_mermaid)
             lines.append("```")
             lines.append("")
         if s.mnemonic:
-            lines.append(f"> 📝 **Mnemonic:** {s.mnemonic}")
+            lines.append(f"> 📝 **Mnemônico:** {s.mnemonic}")
             lines.append("")
         if s.source_chunks:
-            lines.append(f"<sub>Sources: {', '.join(s.source_chunks)}</sub>")
+            lines.append(f"<sub>Fontes: {', '.join(s.source_chunks)}</sub>")
             lines.append("")
         lines.append("---")
         lines.append("")

@@ -80,6 +80,7 @@ HTML = r"""<!DOCTYPE html>
 <title>medstudy</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
 <style>
   /* ── CSS variables — dark (default) ── */
@@ -170,6 +171,11 @@ HTML = r"""<!DOCTYPE html>
   /* theme toggle */
   .theme-btn { background:var(--surface); border:1px solid var(--border); color:var(--text2); border-radius:.5rem; padding:.3rem .65rem; font-size:.85rem; cursor:pointer; transition:background .15s; }
   .theme-btn:hover { background:var(--surface2); }
+
+  /* mermaid diagrams */
+  .mermaid-wrap { background:var(--surface); border:1px solid var(--border); border-radius:.75rem; padding:1.5rem; margin:1rem 0; overflow-x:auto; text-align:center; }
+  .mermaid-wrap svg { max-width:100%; height:auto; }
+  .mermaid-label { font-size:.7rem; color:var(--text3); text-align:right; margin-top:.5rem; letter-spacing:.03em; }
 </style>
 </head>
 <body class="min-h-screen font-sans" x-data="app()" x-init="init()" :class="light ? 'light' : ''" x-cloak>
@@ -313,6 +319,41 @@ HTML = r"""<!DOCTYPE html>
 <script>
 marked.setOptions({ breaks: true, gfm: true });
 
+function initMermaid(light) {
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: light ? 'default' : 'dark',
+    themeVariables: light
+      ? { primaryColor: '#e0f2fe', primaryTextColor: '#0c4a6e', primaryBorderColor: '#7dd3fc',
+          lineColor: '#0284c7', background: '#ffffff', mainBkg: '#f0f9ff' }
+      : { primaryColor: '#1e3a5f', primaryTextColor: '#e2e8f0', primaryBorderColor: '#38bdf8',
+          lineColor: '#38bdf8', background: '#0f172a', mainBkg: '#1e293b' },
+    flowchart: { curve: 'basis', padding: 20 },
+  });
+}
+
+async function renderMermaid() {
+  await new Promise(r => setTimeout(r, 50)); // let Alpine flush x-html
+  const blocks = document.querySelectorAll('pre code.language-mermaid');
+  if (!blocks.length) return;
+  blocks.forEach(code => {
+    const pre = code.parentElement;
+    const src = code.textContent;
+    const wrap = document.createElement('div');
+    wrap.className = 'mermaid-wrap';
+    const diag = document.createElement('div');
+    diag.className = 'mermaid';
+    diag.textContent = src;
+    const lbl = document.createElement('div');
+    lbl.className = 'mermaid-label';
+    lbl.textContent = 'diagrama gerado automaticamente';
+    wrap.appendChild(diag);
+    wrap.appendChild(lbl);
+    pre.replaceWith(wrap);
+  });
+  await mermaid.run({ querySelector: '.mermaid' });
+}
+
 function app() {
   return {
     exams: [], exam: null, currentExam: '',
@@ -347,9 +388,12 @@ function app() {
     toggleTheme() {
       this.light = !this.light;
       localStorage.setItem('theme', this.light ? 'light' : 'dark');
+      initMermaid(this.light);
+      renderMermaid();
     },
 
     async init() {
+      initMermaid(this.light);
       const res = await fetch('/api/exams');
       this.exams = await res.json();
       if (this.exams.length) { this.currentExam = this.exams[0].name; await this.switchExam(); }
@@ -372,6 +416,7 @@ function app() {
         if (!r.ok) { this.guideError = (await r.json()).detail; return; }
         this.guideHtml = marked.parse((await r.json()).content);
         this.statusMsg = 'Guia carregado';
+        this.$nextTick(renderMermaid);
       } catch { this.guideError = 'Erro ao carregar guia.'; }
       finally { this.guideLoading = false; }
     },
