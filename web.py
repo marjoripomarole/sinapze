@@ -275,9 +275,8 @@ HTML = r"""<!DOCTYPE html>
         <div style="perspective:1200px; min-height:280px; position:relative;">
           <template x-if="currentCard">
             <div class="cursor-pointer select-none"
-              :style="cardFlipped ? 'transform:rotateY(180deg)' : ''"
-              @click="cardFlipped = !cardFlipped"
-              style="transform-style:preserve-3d; transition:transform .5s; min-height:280px; position:relative;">
+              :style="{ transform: cardFlipped ? 'rotateY(180deg)' : 'none', 'transform-style': 'preserve-3d', transition: 'transform .5s', 'min-height': '280px', position: 'relative' }"
+              @click="cardFlipped = !cardFlipped">
 
               <div class="card-front absolute inset-0 rounded-2xl p-8 flex flex-col justify-center">
                 <div class="text-xs dimmed mb-4 flex gap-2 flex-wrap">
