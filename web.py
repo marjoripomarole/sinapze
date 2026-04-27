@@ -218,7 +218,7 @@ HTML = r"""<!DOCTYPE html>
     <span class="text-xs dimmed" x-text="statusMsg"></span>
     <!-- Theme toggle -->
     <button class="theme-btn" @click="toggleTheme()" :title="light ? 'Modo escuro' : 'Modo claro'">
-      <span x-text="light ? '🌙 Escuro' : '☀️ Claro'"></span>
+      <span x-text="light ? 'Escuro' : 'Claro'"></span>
     </button>
   </div>
 </header>
@@ -230,7 +230,6 @@ HTML = r"""<!DOCTYPE html>
   <div x-show="activeTab === 'guide'">
     <div x-show="guideLoading" class="muted text-center py-20"><p class="text-lg">Carregando guia…</p></div>
     <div x-show="guideError" class="panel rounded-xl p-8 text-center muted">
-      <p class="text-xl mb-2">📄</p>
       <p x-text="guideError"></p>
       <p class="text-sm mt-3 dimmed">O guia está sendo gerado. Atualize a página em alguns minutos.</p>
     </div>
@@ -247,7 +246,6 @@ HTML = r"""<!DOCTYPE html>
   <!-- ── CARDS ── -->
   <div x-show="activeTab === 'cards'">
     <div x-show="!exam || !exam.has_cards" class="panel rounded-xl p-10 text-center muted">
-      <p class="text-3xl mb-4">🃏</p>
       <p class="text-lg mb-2">Os cartões ainda não foram gerados.</p>
       <code class="text-sm panel2 px-3 py-1.5 rounded text-sky-600">
         medstudy cards --exam <span x-text="currentExam"></span> --output ./out/<span x-text="currentExam"></span>.apkg
@@ -294,7 +292,7 @@ HTML = r"""<!DOCTYPE html>
               <div class="card-back absolute inset-0 rounded-2xl p-8 flex flex-col justify-center">
                 <p class="text-base leading-relaxed" x-text="currentCard.back || '(cloze — ver frente)'"></p>
                 <div x-show="currentCard.explanation" class="mt-4 text-sm dimmed pt-3" style="border-top:1px solid var(--border)" x-text="currentCard.explanation"></div>
-                <div x-show="currentCard.mnemonic" class="mt-3 text-sm text-amber-600 italic" x-text="'💡 ' + currentCard.mnemonic"></div>
+                <div x-show="currentCard.mnemonic" class="mt-3 text-sm text-amber-600 italic" x-text="'Mnemônico: ' + currentCard.mnemonic"></div>
                 <p class="text-xs dimmed mt-3 pt-3" style="border-top:1px solid var(--border)" x-text="'Fonte: ' + currentCard.source_span"></p>
               </div>
             </div>
@@ -311,7 +309,7 @@ HTML = r"""<!DOCTYPE html>
               style="background:rgba(239,68,68,.15); color:#ef4444">Difícil</button>
             <button @click="markCard('good')"
               class="px-4 py-2 rounded-lg text-sm transition-colors"
-              style="background:rgba(34,197,94,.15); color:#16a34a">Sabia ✓</button>
+              style="background:rgba(34,197,94,.15); color:#16a34a">Sabia</button>
           </div>
 
           <button @click="nextCard()" :disabled="cardIndex >= filteredCards.length - 1"

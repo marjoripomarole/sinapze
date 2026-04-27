@@ -49,8 +49,8 @@ _BASIC_MODEL = genanki.Model(
             "afmt": (
                 "{{FrontSide}}<hr id='answer'>{{Back}}"
                 "{{#Explanation}}<div class='explanation'>{{Explanation}}</div>{{/Explanation}}"
-                "{{#Mnemonic}}<div class='mnemonic'>📝 {{Mnemonic}}</div>{{/Mnemonic}}"
-                "{{#Source}}<div class='source'>📖 {{Source}}</div>{{/Source}}"
+                "{{#Mnemonic}}<div class='mnemonic'>Mnemônico: {{Mnemonic}}</div>{{/Mnemonic}}"
+                "{{#Source}}<div class='source'>Fonte: {{Source}}</div>{{/Source}}"
             ),
         }
     ],
@@ -75,8 +75,8 @@ _CLOZE_MODEL = genanki.Model(
             "afmt": (
                 "{{cloze:Text}}"
                 "{{#Explanation}}<div class='explanation'>{{Explanation}}</div>{{/Explanation}}"
-                "{{#Mnemonic}}<div class='mnemonic'>📝 {{Mnemonic}}</div>{{/Mnemonic}}"
-                "{{#Source}}<div class='source'>📖 {{Source}}</div>{{/Source}}"
+                "{{#Mnemonic}}<div class='mnemonic'>Mnemônico: {{Mnemonic}}</div>{{/Mnemonic}}"
+                "{{#Source}}<div class='source'>Fonte: {{Source}}</div>{{/Source}}"
             ),
         }
     ],
@@ -161,7 +161,7 @@ def export_markdown_guide(guide: StudyGuide, output_path: Path) -> Path:
     lines.append("")
 
     if guide.high_yield_summary:
-        lines.append("## 🔥 Resumo de alto rendimento para o dia da prova")
+        lines.append("## Resumo de alto rendimento para o dia da prova")
         lines.append("")
         lines.append(guide.high_yield_summary)
         lines.append("")
@@ -201,7 +201,7 @@ def export_markdown_guide(guide: StudyGuide, output_path: Path) -> Path:
             lines.append("```")
             lines.append("")
         if s.mnemonic:
-            lines.append(f"> 📝 **Mnemônico:** {s.mnemonic}")
+            lines.append(f"> **Mnemônico:** {s.mnemonic}")
             lines.append("")
         if s.source_chunks:
             lines.append(f"<sub>Fontes: {', '.join(s.source_chunks)}</sub>")
