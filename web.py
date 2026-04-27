@@ -325,6 +325,10 @@ HTML = r"""<!DOCTYPE html>
 </main>
 
 <script>
+// Static data injected by build_static.py — null when running via FastAPI server
+const __STATIC__ = window.__STATIC__ || null;
+function _staticExam(name) { return __STATIC__?.exams?.find(e => e.name === name) || null; }
+
 marked.setOptions({ breaks: true, gfm: true });
 
 function initMermaid(light) {
@@ -416,8 +420,12 @@ function app() {
 
     async init() {
       initMermaid(this.light);
-      const res = await fetch('/api/exams');
-      this.exams = await res.json();
+      if (__STATIC__) {
+        this.exams = __STATIC__.exams.map(({ name, has_guide, has_plan, has_cards, card_count }) =>
+          ({ name, has_guide, has_plan, has_cards, card_count }));
+      } else {
+        this.exams = await fetch('/api/exams').then(r => r.json());
+      }
       if (this.exams.length) { this.currentExam = this.exams[0].name; await this.switchExam(); }
     },
 
@@ -434,21 +442,25 @@ function app() {
 
     async loadGuide() {
       try {
-        const r = await fetch('/api/exam/' + this.currentExam + '/guide');
-        if (!r.ok) { this.guideError = (await r.json()).detail; return; }
-        this.guideHtml = marked.parse((await r.json()).content);
+        const sd = _staticExam(this.currentExam);
+        const content = sd?.guide ?? await fetch('/api/exam/' + this.currentExam + '/guide')
+          .then(r => { if (!r.ok) throw r; return r.json(); }).then(j => j.content);
+        if (!content) { this.guideError = 'Guia não gerado ainda.'; return; }
+        this.guideHtml = marked.parse(content);
         this.statusMsg = 'Guia carregado';
         this.$nextTick(() => { renderMermaid(); renderKaTeX(); });
-      } catch { this.guideError = 'Erro ao carregar guia.'; }
+      } catch { this.guideError = 'Guia não gerado ainda.'; }
       finally { this.guideLoading = false; }
     },
 
     async loadPlan() {
       try {
-        const r = await fetch('/api/exam/' + this.currentExam + '/plan');
-        if (!r.ok) { this.planError = (await r.json()).detail; return; }
-        this.planHtml = this.renderPlan((await r.json()).content);
-      } catch { this.planError = 'Erro ao carregar plano.'; }
+        const sd = _staticExam(this.currentExam);
+        const content = sd?.plan ?? await fetch('/api/exam/' + this.currentExam + '/plan')
+          .then(r => { if (!r.ok) throw r; return r.json(); }).then(j => j.content);
+        if (!content) { this.planError = 'Plano não gerado ainda.'; return; }
+        this.planHtml = this.renderPlan(content);
+      } catch { this.planError = 'Plano não gerado ainda.'; }
       finally { this.planLoading = false; }
     },
 
@@ -468,9 +480,9 @@ function app() {
 
     async loadCards() {
       try {
-        const r = await fetch('/api/exam/' + this.currentExam + '/cards');
-        if (!r.ok) return;
-        this.cards = (await r.json()).cards || [];
+        const sd = _staticExam(this.currentExam);
+        this.cards = sd?.cards ?? await fetch('/api/exam/' + this.currentExam + '/cards')
+          .then(r => r.ok ? r.json() : { cards: [] }).then(j => j.cards || []);
       } catch { /* not available yet */ }
     },
 
