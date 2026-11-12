@@ -12,22 +12,22 @@ GitHub Pages: https://marjoripomarole.github.io/sinapze/
 
 ## Working directory
 
-All commands are run from `medstudy/` (the extracted package root):
+All commands are run from the repo root:
 
 ```bash
-cd /Users/marjoripomarole/projects/medstudy/medstudy
+cd /Users/marjoripomarole/projects/sinapze/sinapze
 .venv/bin/sinapze <command>
 python web.py          # web UI on http://localhost:8000
 ```
 
 ## Architecture
 
-CLI tool + FastAPI web UI, Python 3.13, ~2 200 lines. Modules:
+CLI tool + FastAPI web UI, Python 3.13. Modules:
 
 | Module | Responsibility |
 |---|---|
 | `sinapze/models.py` | Pydantic models: Source, Chunk, Fact, Card, StudyGuide, Scope |
-| `sinapze/config.py` | pydantic-settings; loads from `.env` and `MEDSTUDY_*` env vars |
+| `sinapze/config.py` | pydantic-settings; loads from `.env` and `SINAPZE_*` env vars |
 | `sinapze/ingest.py` | PDF (pypdf) + markdown (frontmatter) parsing, semantic chunking |
 | `sinapze/scope.py` | Frontmatter-driven exam scoping + source ranking |
 | `sinapze/prompts.py` | Master prompts encoding cognitive-science principles |
@@ -38,7 +38,7 @@ CLI tool + FastAPI web UI, Python 3.13, ~2 200 lines. Modules:
 | `sinapze/cli.py` | Click commands: ingest, scope, scope-from-tags, rank, guide, cards, plan, doctor |
 | `web.py` | FastAPI web UI — guide and card quiz (root of project, not inside package) |
 
-## Core design philosophy — DO NOT VIOLATE
+## Core design rules
 
 1. **Source-grounded.** Every fact, card, and guide section must cite a
    verbatim `source_span` ≤25 words from the input. The verifier pass
@@ -106,16 +106,12 @@ git add docs/ && git commit && git push
 
 Data embedded as `window.__STATIC__` JSON. Web UI checks this before fetch.
 
-## Current exam
+## Existing exam data
 
-- Exam name: **N1**, subject: Molécula à Célula I (bioquímica e biologia celular)
-- Exam date: 2026-04-28T09:00
-- 135 sources scoped (177 ingested, noise filtered)
-- Guide: complete at `out/N1_guide.md` (5507 lines, 518 KB)
-- Cards: complete at `out/N1.apkg` (400 cards); `.sinapze/cards__N1.json`
-- Cram plan: complete at `out/N1_plano_revisao.md`
+Per-exam scope and cards live in `.sinapze/` (`scope__<exam>.json`, `cards__<exam>.json`);
+guides, decks and cram plans live in `out/`. N1 (Molécula à Célula I, exam 2026-04-28) is complete.
 
-## Deferred features — DO NOT ADD without discussion
+## Deferred features — discuss with the user before adding
 
 - Obsidian plugin as primary UI
 - Local vector store (SQLite+vec1, pgvector)
